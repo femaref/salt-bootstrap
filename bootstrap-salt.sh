@@ -565,7 +565,7 @@ fi
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
 echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-echowarn "Running the unstable version of ${__ScriptName}"
+#echowarn "Running the unstable version of ${__ScriptName}"
 
 # Define installation type
 if [ "$#" -gt 0 ];then
@@ -1008,6 +1008,8 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "Arch" ]; then
             DISTRO_NAME="Arch Linux"
             return
+        elif [ "${DISTRO_NAME}" = "Devuan" ]; then
+            DISTRO_NAME="Debian"
         fi
         rv=$(lsb_release -sr)
         [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
@@ -1055,7 +1057,7 @@ __gather_linux_system_info() {
             arch               ) n="Arch Linux"     ;;
             alpine             ) n="Alpine Linux"   ;;
             centos             ) n="CentOS"         ;;
-            debian             ) n="Debian"         ;;
+            debian|devuan      ) n="Debian"         ;;
             ubuntu             ) n="Ubuntu"         ;;
             fedora             ) n="Fedora"         ;;
             suse|opensuse      ) n="SUSE"           ;;
@@ -1096,7 +1098,7 @@ __gather_linux_system_info() {
                     cloudlinux  )
                         n="Cloud Linux"
                         ;;
-                    debian      )
+                    debian|devuan )
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
                         ;;
@@ -2698,12 +2700,6 @@ install_ubuntu_deps() {
         __PACKAGES="upstart"
     fi
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        PY_PKG_VER=""
-    fi
-
     if [ "$DISTRO_MAJOR_VERSION" -ge 16 ] && [ -z "$_PY_EXE" ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
@@ -2712,13 +2708,13 @@ install_ubuntu_deps() {
         __PACKAGES="${__PACKAGES} python-virtualenv"
     fi
     # Need python-apt for managing packages via Salt
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apt"
+    __PACKAGES="${__PACKAGES} python-apt"
 
     # requests is still used by many salt modules
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-requests"
+    __PACKAGES="${__PACKAGES} python-requests"
 
     # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
+    __PACKAGES="${__PACKAGES} python-yaml"
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
